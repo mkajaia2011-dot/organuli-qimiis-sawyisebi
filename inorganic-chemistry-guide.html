@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ქიმიის ინტერაქტიული სასწავლო აპლიკაცია</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --secondary: #0284c7;
+            --secondary-hover: #0369a1;
+            --accent: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            text-align: center;
+            padding: 2.2rem 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #38bdf8;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            padding: 1rem 1.4rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 3px solid transparent;
+        }
+
+        nav button:hover {
+            color: #ffffff;
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        nav button.active {
+            color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.1);
+            border-bottom: 3px solid #38bdf8;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #0f172a;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            color: var(--primary);
+            margin: 1.8rem 0 1rem 0;
+            font-size: 1.25rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.4rem;
+        }
+
+        .def-box {
+            background: #f8fafc;
+            border-left: 4px solid var(--secondary);
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2rem 0;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0284c7;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        tr:hover {
+            background-color: #f0f9ff;
+        }
+
+        .formula-cell {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-weight: bold;
+            color: #0369a1;
+            font-size: 1.05rem;
+        }
+
+        .structure-cell {
+            font-family: 'Consolas', monospace;
+            color: #d97706;
+            font-weight: 600;
+        }
+
+        .exp-btn {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 5px rgba(234, 88, 12, 0.2);
+        }
+
+        .exp-btn:hover {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(234, 88, 12, 0.3);
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        li {
+            margin-bottom: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.2rem;
+            border-radius: 12px;
+            max-width: 580px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            animation: modalPop 0.25s ease-out;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px; right: 18px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+        }
+
+        #modal-title {
+            color: #0f172a;
+            font-size: 1.35rem;
+            border-bottom: 2px solid #0284c7;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #modal-body {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        /* Interactive Indicator Box */
+        .indicator-interactive {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .flask-preview {
+            width: 120px;
+            height: 140px;
+            margin: 1.2rem auto;
+            border-radius: 10px 10px 50px 50px;
+            border: 4px solid #475569;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.1);
+        }
+
+        .flask-liquid {
+            width: 100%;
+            height: 75%;
+            background: #7c3aed;
+            transition: background 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .sim-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .sim-btn {
+            padding: 8px 16px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .sim-btn:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+        }
+
+        /* Game styling */
+        .game-card-wrapper {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-card {
+            font-size: 2.6rem;
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .game-feedback {
+            min-height: 28px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .option-btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 1.1rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+        }
+
+        .option-btn:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4);
+        }
+
+        .score-board {
+            margin-top: 2rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 1rem;
+            border-radius: 8px;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (max-width: 640px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .tab-content {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🧪 ქიმიის ინტერაქტიული გზამკვლევი</h1>
+    <p>არაორგანულ ნაერთთა ძირითადი კლასები და ექსპერიმენტები</p>
+</header>
+
+<nav>
+    <button class="nav-btn active" onclick="openTab(event, 'oxides')">1. ოქსიდები</button>
+    <button class="nav-btn" onclick="openTab(event, 'acids')">2. მჟავები</button>
+    <button class="nav-btn" onclick="openTab(event, 'bases')">3. ფუძეები</button>
+    <button class="nav-btn" onclick="openTab(event, 'indicators')">4. ინდიკატორები</button>
+    <button class="nav-btn" onclick="openTab(event, 'salts')">5. მარილები</button>
+    <button class="nav-btn" onclick="openTab(event, 'game')">🎮 თამაში</button>
+</nav>
+
+<div class="container">
+
+    <!-- 1. ოქსიდები -->
+    <div id="oxides" class="tab-content active">
+        <h2>🔥 1. ოქსიდები</h2>
+        <div class="def-box">
+            <strong>განმარტება:</strong> ოქსიდი არის რთული ნივთიერება (ორელემენტიანი ნაერთი), რომელიც შედგება ორი ქიმიური ელემენტისგან, რომელთაგან ერთ-ერთი ჟანგბადია (-2 ჟანგვის ხარისხით).
+        </div>
+        
+        <h3>კლასიფიკაცია და გრაფიკული ფორმულები</h3>
+        <table>
+            <tr>
+                <th>ტიპი</th>
+                <th>ფორმულა</th>
+                <th>სახელწოდება</th>
+                <th>გრაფიკული (სტრუქტურული) ფორმულა</th>
+            </tr>
+            <tr>
+                <td>ფუძე ოქსიდი</td>
+                <td class="formula-cell">Na₂O</td>
+                <td>ნატრიუმის ოქსიდი</td>
+                <td class="structure-cell">Na — O — Na</td>
+            </tr>
+            <tr>
+                <td>ფუძე ოქსიდი</td>
+                <td class="formula-cell">CaO</td>
+                <td>კალციუმის ოქსიდი</td>
+                <td class="structure-cell">Ca = O</td>
+            </tr>
+            <tr>
+                <td>მჟავა ოქსიდი</td>
+                <td class="formula-cell">CO₂</td>
+                <td>ნახშირბადის (IV) ოქსიდი</td>
+                <td class="structure-cell">O = C = O</td>
+            </tr>
+            <tr>
+                <td>მჟავა ოქსიდი</td>
+                <td class="formula-cell">SO₃</td>
+                <td>გოგირდის (VI) ოქსიდი</td>
+                <td class="structure-cell">O = S(=O) = O</td>
+            </tr>
+            <tr>
+                <td>ამფოტერული</td>
+                <td class="formula-cell">Al₂O₃</td>
+                <td>ალუმინის ოქსიდი</td>
+                <td class="structure-cell">O = Al — O — Al = O</td>
+            </tr>
+            <tr>
+                <td>ამფოტერული</td>
+                <td class="formula-cell">ZnO</td>
+                <td>თუთიის ოქსიდი (ცინკის ოქსიდი)</td>
+                <td class="structure-cell">Zn = O</td>
+            </tr>
+        </table>
+
+        <h3>მიღება და ქიმიური თვისებები</h3>
+        <ul>
+            <li><strong>მიღება (მარტივი ნივთიერების ჟანგვა/წვა):</strong> 2Mg + O₂ → 2MgO 
+                <button class="exp-btn" onclick="showExp('მაგნიუმის წვა', 'მაგნიუმის ლენტს ვუჭერთ მაშას და შევანთებთ სპირტქურის ალზე. მაგნიუმი იწვის კაშკაშა თეთრი ალებით. შედეგად წარმოიქმნება თეთრი ფხვნილი — მაგნიუმის ოქსიდი (MgO).')">ცდა 🧪</button>
+            </li>
+            <li><strong>ფუძე ოქსიდის ურთიერთქმედება წყალთან:</strong> CaO + H₂O → Ca(OH)₂ 
+                <button class="exp-btn" onclick="showExp('კირის ჩაქრობა', 'უჩაქრობ კირს (CaO) ვამატებთ წყალს. მიმდინარეობს ძლიერი ეგზოთერმული რეაქცია, ნარევი ცხელდება, ორთქლდება და მიიღება ჩამქრალი კირი — Ca(OH)₂.')">ცდა 🧪</button>
+            </li>
+            <li><strong>მჟავა ოქსიდის ურთიერთქმედება წყალთან:</strong> SO₃ + H₂O → H₂SO₄ 
+                <button class="exp-btn" onclick="showExp('გოგირდის (VI) ოქსიდის გახსნა', 'SO₃-ის წყალში გახსნისას წარმოიქმნება გოგირდმჟავა (H₂SO₄), რაც მოწმდება ლაკმუსის ინდიკატორით — ხსნარი წითლდება.')">ცდა 🧪</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 2. მჟავები -->
+    <div id="acids" class="tab-content">
+        <h2>🍋 2. მჟავები</h2>
+        <div class="def-box">
+            <strong>განმარტება:</strong> რთული ნივთიერებები, რომლებიც შედგება მეტალის ატომით ჩანაცვლების უნარის მქონე წყალბადის ატომებისა და მჟავას ნაშთისგან.
+        </div>
+        
+        <h3>კლასიფიკაცია და ფუძიანობა</h3>
+        <table>
+            <tr>
+                <th>ფორმულა</th>
+                <th>სახელწოდება</th>
+                <th>ფუძიანობა</th>
+                <th>ჟანგბადიანობა</th>
+                <th>გრაფიკული ფორმულა</th>
+            </tr>
+            <tr>
+                <td class="formula-cell">HCl</td>
+                <td>მარილმჟავა (ქლორწყალბადმჟავა)</td>
+                <td>ერთფუძიანი</td>
+                <td>უჟანგბადო</td>
+                <td class="structure-cell">H — Cl</td>
+            </tr>
+            <tr>
+                <td class="formula-cell">HNO₃</td>
+                <td>აზოტმჟავა</td>
+                <td>ერთფუძიანი</td>
+                <td>ჟანგბადიანი</td>
+                <td class="structure-cell">H — O — N(=O)=O</td>
+            </tr>
+            <tr>
+                <td class="formula-cell">H₂SO₄</td>
+                <td>გოგირდმჟავა</td>
+                <td>ორფუძიანი</td>
+                <td>ჟანგბადიანი</td>
+                <td class="structure-cell">H — O — S(=O)₂ — O — H</td>
+            </tr>
+            <tr>
+                <td class="formula-cell">H₃PO₄</td>
+                <td>ორთოფოსფორმჟავა</td>
+                <td>სამფუძიანი</td>
+                <td>ჟანგბადიანი</td>
+                <td class="structure-cell">(H—O)₃ — P = O</td>
+            </tr>
+        </table>
+
+        <h3>მიღება და ქიმიური თვისებები</h3>
+        <ul>
+            <li><strong>ურთიერთქმედება მეტალებთან (ძაბვის მწკრივში H-მდე მდგომი):</strong> Zn + 2HCl → ZnCl₂ + H₂↑ 
+                <button class="exp-btn" onclick="showExp('წყალბადის გამოყოფა', 'სინჯარაში თუთიის (Zn) მარცვლებს ვასხამთ განზავებულ მარილმჟავას. იწყება წყალბადის გაზის (H₂) ინტენსიური გამოყოფა ბუშტუკების სახით.')">ცდა 🧪</button>
+            </li>
+            <li><strong>ურთიერთქმედება ფუძეებთან (ნეიტრალიზაცია):</strong> NaOH + HCl → NaCl + H₂O 
+                <button class="exp-btn" onclick="showExp('ნეიტრალიზაციის რეაქცია', 'ფენოლფთალეინით ჟოლოსფრად შეფერილ NaOH-ის ტუტის ხსნარს წვეთ-წვეთობით ვამატებთ HCl-ს, სანამ ხსნარი სრულად არ გაუფერულდება.')">ცდა 🧪</button>
+            </li>
+            <li><strong>მჟავას მიღება (მჟავა ოქსიდი + წყალი):</strong> P₂O₅ + 3H₂O → 2H₃PO₄ 
+                <button class="exp-btn" onclick="showExp('ფოსფორმჟავას მიღება', 'ფოსფორის წვის შედეგად მიღებულ თეთრ ნალექს (P₂O₅) ვხსნით ცხელ წყალში. წარმოიქმნება ორთოფოსფორმჟავა.')">ცდა 🧪</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 3. ფუძეები -->
+    <div id="bases" class="tab-content">
+        <h2>🧼 3. ფუძეები (ჰიდროქსიდები)</h2>
+        <div class="def-box">
+            <strong>განმარტება:</strong> რთული ნივთიერებები, რომლებიც შედგება მეტალის ატომისა (ან ამონიუმის იონის NH₄⁺) და ერთი ან რამდენიმე ჰიდროქსილის (OH⁻) ჯგუფისგან.
+        </div>
+        
+        <h3>სახელწოდება და სტრუქტურა</h3>
+        <table>
+            <tr>
+                <th>ფორმულა</th>
+                <th>სახელწოდება</th>
+                <th>ტიპი (ხსნადობა)</th>
+                <th>გრაფიკული ფორმულა</th>
+            </tr>
+            <tr>
+                <td class="formula-cell">NaOH</td>
+                <td>ნატრიუმის ჰიდროქსიდი (მწვავე ნატრიუმი)</td>
+                <td>ტუტე (კარგად ხსნადი)</td>
+                <td class="structure-cell">Na — O — H</td>
+            </tr>
+            <tr>
+                <td class="formula-cell">Ca(OH)₂</td>
+                <td>კალციუმის ჰიდროქსიდი (ჩამქრალი კირი)</td>
+                <td>ტუტე (მცირედ ხსნადი)</td>
+                <td class="structure-cell">H — O — Ca — O — H</td>
+            </tr>
+            <tr>
+                <td class="formula-cell">Cu(OH)₂</td>
+                <td>სპილენძის (II) ჰიდროქსიდი</td>
+                <td>უხსნადი ფუძე</td>
+                <td class="structure-cell">H — O — Cu — O — H</td>
+            </tr>
+        </table>
+
+        <h3>მიღება და ქიმიური თვისებები</h3>
+        <ul>
+            <li><strong>ტუტის მიღება (აქტიური ტუტე მეტალი + წყალი):</strong> 2Na + 2H₂O → 2NaOH + H₂↑ 
+                <button class="exp-btn" onclick="showExp('ნატრიუმის რეაქცია წყალთან', 'წყლიან ჯამში ვაგდებთ გასუფთავებულ ნატრიუმის პატარა ნაჭერს. ნატრიუმი რეაქციის სითბოსგან ლღვება, სფეროსებრად დარბის წყლის ზედაპირზე და ენერგიულად გამოყოფს წყალბადს.')">ცდა 🧪</button>
+            </li>
+            <li><strong>უხსნადი ფუძის მიღება:</strong> CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄ 
+                <button class="exp-btn" onclick="showExp('სპილენძის ჰიდროქსიდის დალექვა', 'შაბიამნის (CuSO₄) ცისფერ ხსნარს ვამატებთ NaOH-ს. წამიერად წარმოიქმნება ლურჯი ჟელესებრი ნალექი Cu(OH)₂.')">ცდა 🧪</button>
+            </li>
+            <li><strong>უხსნადი ფუძის თერმული დაშლა:</strong> Cu(OH)₂ → CuO + H₂O 
+                <button class="exp-btn" onclick="showExp('Cu(OH)₂-ის დაშლა გაცხელებით', 'ლურჯ ნალექს (Cu(OH)₂) ვაცხელებთ სპირტქურაზე. ლურჯი ფერი სწრაფად იცვლება შავად, რადგან წარმოიქმნება შავი ფერის სპილენძის (II) ოქსიდი (CuO).')">ცდა 🧪</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 4. ინდიკატორები -->
+    <div id="indicators" class="tab-content">
+        <h2>🌈 4. ინდიკატორები</h2>
+        <div class="def-box">
+            <strong>განმარტება:</strong> ნივთიერებები, რომლებიც იცვლიან ფერს ხსნარის არის (მჟავა, ტუტე, ნეიტრალური) მიხედვით.
+        </div>
+        
+        <table>
+            <tr>
+                <th>ინდიკატორი</th>
+                <th>ნეიტრალური არე (pH = 7)</th>
+                <th>მჟავა არე (H⁺, pH &lt; 7)</th>
+                <th>ტუტე არე (OH⁻, pH &gt; 7)</th>
+            </tr>
+            <tr style="background:#faf5ff;">
+                <td><strong>ლაკმუსი</strong></td>
+                <td><span style="color:#7c3aed; font-weight:bold;">იასამნისფერი</span></td>
+                <td><span style="color:#dc2626; font-weight:bold;">წითელი</span></td>
+                <td><span style="color:#2563eb; font-weight:bold;">ლურჯი</span></td>
+            </tr>
+            <tr style="background:#fff1f2;">
+                <td><strong>ფენოლფთალეინი</strong></td>
+                <td><span>უფერო</span></td>
+                <td><span>უფერო</span></td>
+                <td><span style="color:#db2777; font-weight:bold;">ჟოლოსფერი</span></td>
+            </tr>
+            <tr style="background:#fffbeb;">
+                <td><strong>მეთილნარინჯი (მეთილორანჟი)</strong></td>
+                <td><span style="color:#ea580c; font-weight:bold;">ნარინჯისფერი</span></td>
+                <td><span style="color:#dc2626; font-weight:bold;">ვარდისფერი / წითელი</span></td>
+                <td><span style="color:#ca8a04; font-weight:bold;">ყვითელი</span></td>
+            </tr>
+        </table>
+
+        <!-- Interactive simulator -->
+        <div class="indicator-interactive">
+            <h3>🔬 ინტერაქტიული ლაბორატორია: შეამოწმე ინდიკატორი</h3>
+            <p>აირჩიეთ ინდიკატორი და არე, რათა დააკვირდეთ ფერის ცვლილებას ჭურჭელში:</p>
+            
+            <div style="margin-top: 10px;">
+                <label><strong>ინდიკატორი: </strong></label>
+                <select id="sim-ind-select" onchange="updateFlask()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 1rem;">
+                    <option value="litmus">ლაკმუსი</option>
+                    <option value="phenolphthalein">ფენოლფთალეინი</option>
+                    <option value="methylorange">მეთილნარინჯი</option>
+                </select>
+            </div>
+
+            <div class="sim-controls">
+                <button class="sim-btn" onclick="setMedium('acid')">🔴 მჟავა არე (HCl)</button>
+                <button class="sim-btn" onclick="setMedium('neutral')">⚪ ნეიტრალური (H₂O)</button>
+                <button class="sim-btn" onclick="setMedium('base')">🔵 ტუტე არე (NaOH)</button>
+            </div>
+
+            <div class="flask-preview">
+                <div class="flask-liquid" id="flask-liquid">H₂O</div>
+            </div>
+            <div id="flask-desc" style="font-weight: 600; color: #475569;">ხსნარის შეფერილობა: იასამნისფერი</div>
+        </div>
+    </div>
+
+    <!-- 5. მარილები -->
+    <div id="salts" class="tab-content">
+        <h2>🧂 5. მარილები</h2>
+        <div class="def-box">
+            <strong>განმარტება:</strong> რთული ნივთიერებები, რომლებიც შედგება მეტალის კატიონებისა (ან ამონიუმის NH₄⁺) და მჟავას ნაშთის ანიონებისგან.
+        </div>
+        
+        <h3>მაგალითები და გრაფიკული ფორმულები</h3>
+        <ul>
+            <li><strong>NaCl</strong> (ნატრიუმის ქლორიდი — სუფრის მარილი): <span class="structure-cell">Na — Cl</span></li>
+            <li><strong>CaSO₄</strong> (კალციუმის სულფატი — თაბაშირი): <span class="structure-cell">Ca = (O₂) = S(=O)₂</span></li>
+            <li><strong>Na₂CO₃</strong> (ნატრიუმის კარბონატი — კალცინირებული სოდა): <span class="structure-cell">Na — O — C(=O) — O — Na</span></li>
+        </ul>
+
+        <h3>მარილების მიღების 10 ძირითადი ხერხი</h3>
+        <ol>
+            <li><strong>მეტალი + არამეტალი:</strong> 2Na + Cl₂ → 2NaCl 
+                <button class="exp-btn" onclick="showExp('ხერხი 1: მეტალი + არამეტალი', 'გახურებულ ნატრიუმს ვათავსებთ ქლორის მომწვანო-მოყვითალო აირით სავსე ჭურჭელში. იწყება კაშკაშა აფეთქებისებური წვა, წარმოიქმნება სუფრის მარილი (NaCl).')">ცდა 🧪</button>
+            </li>
+            <li><strong>მეტალი + მჟავა:</strong> Mg + H₂SO₄ → MgSO₄ + H₂↑ 
+                <button class="exp-btn" onclick="showExp('ხერხი 2: მეტალი + მჟავა', 'მაგნიუმის ბურბუშელას ვამატებთ განზავებულ გოგირდმჟავას. ხსნარი დუღს და აქტიურად გამოიყოფა წყალბადი.')">ცდა 🧪</button>
+            </li>
+            <li><strong>მეტალი + მარილი:</strong> Fe + CuSO₄ → FeSO₄ + Cu 
+                <button class="exp-btn" onclick="showExp('ხერხი 3: მეტალი + მარილი', 'გაწმენდილ რკინის ლურსმანს ვათავსებთ CuSO₄ ხსნარში. რამდენიმე წუთში ლურსმანი იფარება წითელი სპილენძის ფენით.')">ცდა 🧪</button>
+            </li>
+            <li><strong>ფუძე ოქსიდი + მჟავა ოქსიდი:</strong> CaO + CO₂ → CaCO₃ 
+                <button class="exp-btn" onclick="showExp('ხერხი 4: ოქსიდი + ოქსიდი', 'გახურებული CaO შთანთქავს ნახშირორჟანგს და გარდაიქმნება მყარ კალციუმის კარბონატად (CaCO₃).')">ცდა 🧪</button>
+            </li>
+            <li><strong>ფუძე ოქსიდი + მჟავა:</strong> CuO + H₂SO₄ → CuSO₄ + H₂O 
+                <button class="exp-btn" onclick="showExp('ხერხი 5: ფუძე ოქსიდი + მჟავა', 'შავ CuO ფხვნილს ვამატებთ გოგირდმჟავას და ვათბობთ. შავი ფხვნილი იხსნება და ხსნარი იღებს მშვენიერ ცისფერ შეფერილობას.')">ცდა 🧪</button>
+            </li>
+            <li><strong>მჟავა ოქსიდი + ტუტე:</strong> CO₂ + Ca(OH)₂ → CaCO₃↓ + H₂O 
+                <button class="exp-btn" onclick="showExp('ხერხი 6: მჟავა ოქსიდი + ტუტე', 'გამჭვირვალე კირიან წყალში მილაკით CO₂-ის გატარებისას ხსნარი იმღვრევა თეთრი CaCO₃-ის დალექვის გამო.')">ცდა 🧪</button>
+            </li>
+            <li><strong>მჟავა + ფუძე (ნეიტრალიზაცია):</strong> KOH + HNO₃ → KNO₃ + H₂O 
+                <button class="exp-btn" onclick="showExp('ხერხი 7: ნეიტრალიზაცია', 'ტუტის (KOH) და აზოტმჟავას (HNO₃) შერევით გამოიყოფა სითბო და წარმოიქმნება კალიუმის ნიტრატი და წყალი.')">ცდა 🧪</button>
+            </li>
+            <li><strong>მჟავა + მარილი:</strong> Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂↑ 
+                <button class="exp-btn" onclick="showExp('ხერხი 8: მჟავა + მარილი', 'საჭმელ სოდას ვასხამთ მარილმჟავას. მყისიერად იწყება ქაფის წარმოქმნა და CO₂-ის აქტიური გამოყოფა.')">ცდა 🧪</button>
+            </li>
+            <li><strong>ტუტე + მარილი:</strong> 2NaOH + FeCl₃ → Fe(OH)₃↓ + 3NaCl 
+                <button class="exp-btn" onclick="showExp('ხერხი 9: ტუტე + მარილი', 'FeCl₃-ის ყვითელ ხსნარს ვამატებთ NaOH-ს. მაშინვე ილექება წითელ-ყავისფერი რკინის (III) ჰიდროქსიდი.')">ცდა 🧪</button>
+            </li>
+            <li><strong>მარილი + მარილი (მიმოცვლის რეაქცია):</strong> AgNO₃ + NaCl → AgCl↓ + NaNO₃ 
+                <button class="exp-btn" onclick="showExp('ხერხი 10: მარილი + მარილი', 'ორი გამჭვირვალე ხსნარის (AgNO₃ და NaCl) შერევით წამში წარმოიქმნება თეთრი ხაჭოსებრი ნალექი — AgCl.')">ცდა 🧪</button>
+            </li>
+        </ol>
+    </div>
+
+    <!-- 🎮 თამაში -->
+    <div id="game" class="tab-content">
+        <h2>🎮 ქიმიური ვიქტორინა: ამოიცანი კლასი</h2>
+        <p style="margin-bottom: 1.5rem;">განსაზღვრეთ, არაორგანულ ნაერთთა რომელ კლასს მიეკუთვნება მოცემული ქიმიური ფორმულა:</p>
+        
+        <div class="game-card-wrapper">
+            <div class="game-card" id="game-formula">...</div>
+            <div class="game-feedback" id="game-feedback"></div>
+        </div>
+        
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkAnswer('ოქსიდი')">ოქსიდი</button>
+            <button class="option-btn" onclick="checkAnswer('მჟავა')">მჟავა</button>
+            <button class="option-btn" onclick="checkAnswer('ფუძე')">ფუძე</button>
+            <button class="option-btn" onclick="checkAnswer('მარილი')">მარილი</button>
+        </div>
+
+        <div class="score-board">
+            ✨ ქულა: <span id="score">0</span> / <span id="total">0</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal ექსპერიმენტების აღწერისთვის -->
+<div id="expModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h3 id="modal-title">🧪 ექსპერიმენტი</h3>
+        <p id="modal-body">დეტალები...</p>
+    </div>
+</div>
+
+<script>
+    // Tab Switching
+    function openTab(evt, tabName) {
+        let tabcontent = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+        let tablinks = document.getElementsByClassName("nav-btn");
+        for (let i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+
+        if (tabName === 'game') {
+            nextQuestion();
+        }
+    }
+
+    // Modal logic
+    function showExp(title, text) {
+        document.getElementById('modal-title').innerHTML = `🧪 ${title}`;
+        document.getElementById('modal-body').innerText = text;
+        document.getElementById('expModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('expModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        let modal = document.getElementById('expModal');
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Indicator Simulator Logic
+    let currentMedium = 'neutral';
+    const indicatorColors = {
+        litmus: {
+            acid: { color: '#dc2626', name: 'წითელი' },
+            neutral: { color: '#7c3aed', name: 'იასამნისფერი' },
+            base: { color: '#2563eb', name: 'ლურჯი' }
+        },
+        phenolphthalein: {
+            acid: { color: '#cbd5e1', name: 'უფერო (გამჭვირვალე)' },
+            neutral: { color: '#cbd5e1', name: 'უფერო (გამჭვირვალე)' },
+            base: { color: '#db2777', name: 'მკვეთრი ჟოლოსფერი' }
+        },
+        methylorange: {
+            acid: { color: '#dc2626', name: 'ვარდისფერი / წითელი' },
+            neutral: { color: '#ea580c', name: 'ნარინჯისფერი' },
+            base: { color: '#eab308', name: 'ყვითელი' }
+        }
+    };
+
+    function setMedium(medium) {
+        currentMedium = medium;
+        updateFlask();
+    }
+
+    function updateFlask() {
+        const ind = document.getElementById('sim-ind-select').value;
+        const res = indicatorColors[ind][currentMedium];
+        const liquid = document.getElementById('flask-liquid');
+        liquid.style.background = res.color;
+        liquid.innerText = currentMedium === 'acid' ? 'HCl (მჟავა)' : (currentMedium === 'base' ? 'NaOH (ტუტე)' : 'H₂O (ნეიტრალური)');
+        document.getElementById('flask-desc').innerText = `ხსნარის შეფერილობა: ${res.name}`;
+    }
+
+    // Game logic
+    const questions = [
+        { formula: 'H₂SO₄', type: 'მჟავა' },
+        { formula: 'CaO', type: 'ოქსიდი' },
+        { formula: 'NaOH', type: 'ფუძე' },
+        { formula: 'NaCl', type: 'მარილი' },
+        { formula: 'P₂O₅', type: 'ოქსიდი' },
+        { formula: 'HNO₃', type: 'მჟავა' },
+        { formula: 'Cu(OH)₂', type: 'ფუძე' },
+        { formula: 'KNO₃', type: 'მარილი' },
+        { formula: 'CO₂', type: 'ოქსიდი' },
+        { formula: 'HCl', type: 'მჟავა' },
+        { formula: 'Fe(OH)₃', type: 'ფუძე' },
+        { formula: 'CaCO₃', type: 'მარილი' },
+        { formula: 'Al₂O₃', type: 'ოქსიდი' },
+        { formula: 'H₃PO₄', type: 'მჟავა' },
+        { formula: 'Ca(OH)₂', type: 'ფუძე' },
+        { formula: 'CuSO₄', type: 'მარილი' }
+    ];
+
+    let currentQ = null;
+    let score = 0;
+    let total = 0;
+
+    function nextQuestion() {
+        let randomIndex = Math.floor(Math.random() * questions.length);
+        currentQ = questions[randomIndex];
+        document.getElementById('game-formula').innerText = currentQ.formula;
+    }
+
+    function checkAnswer(selectedType) {
+        if (!currentQ) return;
+        total++;
+        const feedback = document.getElementById('game-feedback');
+        
+        if (selectedType === currentQ.type) {
+            score++;
+            feedback.style.color = '#10b981';
+            feedback.innerHTML = `✅ სწორია! <b>${currentQ.formula}</b> არის <b>${currentQ.type}</b>.`;
+        } else {
+            feedback.style.color = '#ef4444';
+            feedback.innerHTML = `❌ შეცდომაა! <b>${currentQ.formula}</b> მიეკუთვნება: <b>${currentQ.type}</b>.`;
+        }
+
+        document.getElementById('score').innerText = score;
+        document.getElementById('total').innerText = total;
+        
+        // Next question after a slight delay
+        setTimeout(() => {
+            nextQuestion();
+        }, 1200);
+    }
+
+    // Initialize defaults
+    updateFlask();
+</script>
+
+</body>
+</html>
